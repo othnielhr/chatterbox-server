@@ -33,7 +33,7 @@ var requestHandler = function(request, response) {
   var statusCode = 200;
 
   // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
+  // var headers = defaultCorsHeaders;
 
   // Tell the client we are sending them plain text.
   //
@@ -71,3 +71,4 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+exports.handleRequest = requestHandler;

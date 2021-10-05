@@ -19,5 +19,8 @@
     "eslint-config-hackreactor": "git://github.com/reactorcore/eslint-config-hackreactor",
     "mocha": "^8.2.1",
     "request": "^2.88.2"
+  },
+  "dependencies": {
+    "underscore": "^1.13.1"
   }
 }
