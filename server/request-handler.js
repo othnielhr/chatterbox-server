@@ -20,9 +20,10 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-var messages = {results: []};
+var messages = { results: [] };
+var uniqueId = 0;
 
-var requestHandler = function(request, response) {
+var requestHandler = function (request, response) {
   // console.log('request', request, 'response', response);
   // Request and Response come from node's http module.
   //
@@ -67,6 +68,8 @@ var requestHandler = function(request, response) {
     request.on('end', () => {
       var data = JSON.parse(body);
       data.createdAt = new Date();
+      data.id = uniqueId;
+      uniqueId++;
       console.log('data?', data);
       messages.results.push(data);
     });
@@ -81,10 +84,31 @@ var requestHandler = function(request, response) {
     // console.log('request', request);
     response.end(/*JSON.stringify(data)*/);
   } else if (request.method === 'OPTIONS' && request.url.includes('/classes/messages')) {
-    var template = {username: 'your username', text: 'your text', roomname: 'your room name'};
+    var template = { username: 'your username', text: 'your text', roomname: 'your room name' };
     console.log('in options');
     response.writeHead(statusCode, headers);
     response.end(JSON.stringify(template));
+  } else if (request.method === 'DELETE' && request.url.includes('/classes/messages')) {
+    // iterate over message.results array
+    // if id of current element is same as our id
+    var body = '';
+    request.on('data', chunk => {
+      body += chunk;
+    });
+    request.on('end', () => {
+      var data = JSON.parse(body);
+      for (var i = 0; i < messages.results.length; i++) {
+        if (messages.results[i].id === data.id) {
+          messages.results.splice(i, 1);
+        }
+      }
+    });
+    // looks like it works, need to write a test for this case
+    // PUT should work similarly to this except it requires a full message template rather than just a id number
+    // maybe don't allow user to change username
+    statusCode = 204;
+    response.writeHead(statusCode, headers);
+    response.end();
   } else {
     statusCode = 404;
     response.writeHead(statusCode, headers);
