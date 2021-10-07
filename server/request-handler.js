@@ -51,21 +51,31 @@ var requestHandler = function(request, response) {
   if (request.method === 'GET') {
     if (request.url.includes('/classes/messages')) {
       response.writeHead(statusCode, headers);
-      response.end(JSON.stringify({username: '', text: '', roomname: '', createdAt: ''})); //template of result object
+      var messages = {results: []};
+      response.end(JSON.stringify(messages)); //template of result object {results = []}
     }
     // response.writeHead(statusCode, headers);
     // response.end('No data!');
   } else if (request.method === 'POST') {
     if (request.url.includes('/classes/messages')) {
       response.writeHead(statusCode, headers);
+      // console.log('postman');
+      // https://nodejs.dev/learn/get-http-request-body-data-using-nodejs
+      // ^^^^^^^^^^ FOR request.on() TO GET DATA FROM HTTP REQEUST
+      // add storage array
+      console.log('request', request);
       response.end(/* add response object here */);
     }
+  } else {
+    statusCode = 404;
+    response.writeHead(statusCode, headers);
+    response.end();
   }
 
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  // response.writeHead(statusCode, headers);
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -74,7 +84,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!, Hello myself');
+  // response.end('Hello, World!, Hello myself');
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
