@@ -14,6 +14,8 @@ this file and include it in basic-server.js so that it actually works.
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  // PUT(statusCode = 201) and DELETE(statusCode = 204) work similarly as in they look for the target within the set of data and edit/delete that object
+  // we can take advantage of a unique id to look for the target within our data set
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
@@ -78,6 +80,11 @@ var requestHandler = function(request, response) {
     // for POST, responseCode should be changed to 201 for confirmation
     // console.log('request', request);
     response.end(/*JSON.stringify(data)*/);
+  } else if (request.method === 'OPTIONS' && request.url.includes('/classes/messages')) {
+    var template = {username: 'your username', text: 'your text', roomname: 'your room name'};
+    console.log('in options');
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify(template));
   } else {
     statusCode = 404;
     response.writeHead(statusCode, headers);
@@ -111,3 +118,14 @@ var requestHandler = function(request, response) {
 
 
 exports.requestHandler = requestHandler;
+
+// EXAMPLE MESSAGES
+// {"username": "enzozozo",
+// "text": "this is a message",
+// "roomname": "lobby"
+// }
+
+// {"username": "othniel",
+// "text": "new messageeeeeeeee",
+// "roomname": "lobby"
+// }
