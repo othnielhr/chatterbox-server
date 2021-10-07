@@ -18,6 +18,8 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
+var messages = {results: []};
+
 var requestHandler = function(request, response) {
   // console.log('request', request, 'response', response);
   // Request and Response come from node's http module.
@@ -48,24 +50,34 @@ var requestHandler = function(request, response) {
   // other than plain text, like JSON or HTML.
   headers['Content-Type'] = 'application/json';
 
-  if (request.method === 'GET') {
-    if (request.url.includes('/classes/messages')) {
-      response.writeHead(statusCode, headers);
-      var messages = {results: []};
-      response.end(JSON.stringify(messages)); //template of result object {results = []}
-    }
+  /*   if url does NOT contain '/classes/messages', should return a responseCode of 404 */
+
+  if (request.method === 'GET' && request.url.includes('/classes/messages')) {
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify(messages)); //template of result object {results = []}
     // response.writeHead(statusCode, headers);
     // response.end('No data!');
-  } else if (request.method === 'POST') {
-    if (request.url.includes('/classes/messages')) {
-      response.writeHead(statusCode, headers);
-      // console.log('postman');
-      // https://nodejs.dev/learn/get-http-request-body-data-using-nodejs
-      // ^^^^^^^^^^ FOR request.on() TO GET DATA FROM HTTP REQEUST
-      // add storage array
-      console.log('request', request);
-      response.end(/* add response object here */);
-    }
+  } else if (request.method === 'POST' && request.url.includes('/classes/messages')) {
+    var body = '';
+    request.on('data', chunk => {
+      body += chunk;
+    });
+    request.on('end', () => {
+      var data = JSON.parse(body);
+      data.createdAt = new Date();
+      console.log('data?', data);
+      messages.results.push(data);
+    });
+    statusCode = 201;
+    response.writeHead(statusCode, headers);
+    // console.log('postman');
+    // https://nodejs.dev/learn/get-http-request-body-data-using-nodejs
+    // ^^^^^^^^^^ FOR request.on() TO GET DATA FROM HTTP REQEUST
+    // add storage array
+    // create a date maker for createAt
+    // for POST, responseCode should be changed to 201 for confirmation
+    // console.log('request', request);
+    response.end(/*JSON.stringify(data)*/);
   } else {
     statusCode = 404;
     response.writeHead(statusCode, headers);
