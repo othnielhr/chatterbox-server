@@ -103,4 +103,14 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+  it('Should accepts OPTIONS to /classes/messages', function() {
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    expect(res._data).to.equal(JSON.stringify({username: 'your username', text: 'your text', roomname: 'your room name'}));
+    expect(res._ended).to.equal(true);
+  });
 });
