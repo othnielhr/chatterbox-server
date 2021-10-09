@@ -113,4 +113,102 @@ describe('Node Server Request Listener Function', function() {
     expect(res._data).to.equal(JSON.stringify({username: 'your username', text: 'your text', roomname: 'your room name'}));
     expect(res._ended).to.equal(true);
   });
+
+  it('Should accept DELETE to /classes/messages', function() {
+    var stubMsg = {
+      username: 'Jono',
+      text: 'Do my bidding!',
+      id: 0
+    };
+    var req = new stubs.request('/classes/messages', 'DELETE', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(204);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should properly delete message', function() {
+    var stubMsg = {
+      username: 'Bono',
+      text: 'Do my bidding please!',
+    };
+
+    var deleteMsg = {
+      id: 1
+    };
+
+    // make a post requests
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+    expect(res._responseCode).to.equal(201);
+
+    // make a delete request to delete one of the messages within the results array
+    var req = new stubs.request('/classes/messages', 'DELETE', deleteMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+    expect(res._responseCode).to.equal(204);
+
+    // make a get request to check if the correct message was deleted
+    var req = new stubs.request('/classes/messages', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data).results;
+    expect(messages.length).to.be.above(0);
+    expect(messages[0].username).to.equal('Bono');
+    expect(messages[0].text).to.equal('Do my bidding please!');
+    expect(messages[0].id).to.equal(2);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should accept PUT to /classes/messages', function() {
+    var stubMsg = {
+      username: 'my name here',
+      text: 'make it work',
+      id: 2
+    };
+    var req = new stubs.request('/classes/messages', 'PUT', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(201);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should properly edit message', function() {
+    var stubMsg = {
+      username: 'should not see this change',
+      text: 'this should change',
+      roomname: 'new room should appear',
+      id: 2
+    };
+    var req = new stubs.request('/classes/messages', 'PUT', stubMsg);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(201);
+
+    var req = new stubs.request('/classes/messages', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data).results;
+    expect(messages.length).to.be.above(0);
+    expect(messages[0].username).to.equal('Bono');
+    expect(messages[0].text).to.equal('this should change');
+    expect(messages[0].roomname).to.equal('new room should appear');
+    expect(messages[0].id).to.equal(2);
+    expect(res._ended).to.equal(true);
+  });
 });

@@ -85,7 +85,6 @@ var requestHandler = function (request, response) {
     response.end(/*JSON.stringify(data)*/);
   } else if (request.method === 'OPTIONS' && request.url.includes('/classes/messages')) {
     var template = { username: 'your username', text: 'your text', roomname: 'your room name' };
-    console.log('in options');
     response.writeHead(statusCode, headers);
     response.end(JSON.stringify(template));
   } else if (request.method === 'DELETE' && request.url.includes('/classes/messages')) {
@@ -107,6 +106,23 @@ var requestHandler = function (request, response) {
     // PUT should work similarly to this except it requires a full message template rather than just a id number
     // maybe don't allow user to change username
     statusCode = 204;
+    response.writeHead(statusCode, headers);
+    response.end();
+  } else if (request.method === 'PUT' && request.url.includes('/classes/messages')) {
+    var body = '';
+    request.on('data', chunk => {
+      body += chunk;
+    });
+    request.on('end', () => {
+      var data = JSON.parse(body);
+      for (var i = 0; i < messages.results.length; i++) {
+        if (messages.results[i].id === data.id) {
+          messages.results[i].text = data.text;
+          messages.results[i].roomname = data.roomname || null;
+        }
+      }
+    });
+    statusCode = 201;
     response.writeHead(statusCode, headers);
     response.end();
   } else {
